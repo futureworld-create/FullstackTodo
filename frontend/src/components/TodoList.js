@@ -26,6 +26,31 @@ const TodoList = () => {
         console.error("Error fetching todos:", error);
       });
   }, []);
+  const completedTask = (id, status) => {
+    // Update the todo completion status
+    const token = localStorage.getItem("token");
+    axios
+      .put(
+        `http://localhost:8000/completed_todo/${id}/`,
+        { completed: status },
+        {
+          headers: {
+            Authorization: token ? `Token ${token}` : undefined,
+          },
+        }
+      )
+      .then((response) => {
+        setTodoList((prevTodos) =>
+          prevTodos.map((todo) =>
+            todo.id === id ? { ...todo, completed: status } : todo
+          )
+        );
+      })
+      .catch((error) => {
+        console.error("Error updating todo:", error);
+      });
+  };
+
   return (
     <>
       <TodoNavbar />
@@ -61,10 +86,10 @@ const TodoList = () => {
             >
               <div style={{ flex: 2, color: "#6c63ff" }}>TASK</div>
               <div style={{ flex: 3, color: "#888" }}>Description</div>
-              <div style={{ flex: 1, color: "#888", textAlign: "center" }}>
+              <div style={{ flex: 2, color: "#888", textAlign: "center" }}>
                 Status
               </div>
-              <div style={{ flex: 2, color: "#888", textAlign: "center" }}>
+              <div style={{ flex: 4, color: "#888", textAlign: "center" }}>
                 Actions
               </div>
             </div>
@@ -93,15 +118,43 @@ const TodoList = () => {
                   <div style={{ flex: 3, color: "#666" }}>
                     {todo.description}
                   </div>
-                  <div style={{ flex: 1, textAlign: "center" }}>
+                  <div style={{ flex: 2, textAlign: "center" }}>
                     <input
                       type="checkbox"
                       checked={todo.completed}
+                      onChange={() =>
+                        completedTask(todo.id, !todo.completed)
+                      }
                       readOnly
                       style={{ width: 18, height: 18, accentColor: "#388e3c" }}
                     />
                   </div>
-                  <div style={{ flex: 2, textAlign: "center" }}>
+                  <div
+                    style={{
+                      flex: 4,
+                      textAlign: "center",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <NavLink
+                      to={`/todo/${todo.id}`}
+                      style={{
+                        background: "#6c63ff",
+                        color: "#fff",
+                        borderRadius: 4,
+                        padding: "0.4rem 0.8rem",
+                        textDecoration: "none",
+                        fontWeight: "bold",
+                        marginRight: 8,
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.07)",
+                        transition: "background 0.2s",
+                      }}
+                    >
+                      View
+                    </NavLink>
                     <button
                       style={{
                         background: "#ffd600",

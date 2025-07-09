@@ -5,6 +5,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import AddTodo from "./components/Create_Todo";
 import TodoList from "./components/TodoList";
+import TodoView from "./components/TodoView";
 import { createBrowserRouter } from "react-router-dom";
 
 const router = createBrowserRouter([
@@ -15,6 +16,7 @@ const router = createBrowserRouter([
   { path: "/TodoNavbar", element: <Navbar /> },
   { path: "/add_todo", element: <AddTodo /> },
   { path: "/list_todo", element: <TodoList /> },
+  { path: "/todo/:todoId", element: <TodoView /> },
 ]);
 
 export default router;

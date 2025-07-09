@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from .models import TodoItem
-
+from .serializers import TodoListSerializer
 
 
 @api_view(['POST'])
@@ -80,8 +80,37 @@ def list_todo(request):
         return Response({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
 
     todos = TodoItem.objects.filter(user=user)
-    from .serializers import TodoListSerializer
+   
     
     serializer = TodoListSerializer(todos, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
-    
+@csrf_exempt
+@api_view(['GET'])
+def get_todo(request, todo_id):
+    user = request.user
+    if not user.is_authenticated:
+        return Response({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        todo = TodoItem.objects.get(id=todo_id, user=user)
+    except TodoItem.DoesNotExist:
+        return Response({"error": "Todo item not found"}, status=status.HTTP_404_NOT_FOUND)
+    serializer = TodoListSerializer(todo)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+@csrf_exempt
+@api_view(['PUT'])
+def completed_task(request, todo_id):
+    user = request.user
+    if not user.is_authenticated:
+        return Response({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        todo = TodoItem.objects.get(id=todo_id, user=user)
+    except TodoItem.DoesNotExist:
+        return Response({"error": "Todo item not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    todo.completed = request.data.get('completed', todo.completed)
+    todo.save()
+
+    serializer = TodoListSerializer(todo)
+    return Response(serializer.data, status=status.HTTP_200_OK)
