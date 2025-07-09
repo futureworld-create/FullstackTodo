@@ -114,3 +114,36 @@ def completed_task(request, todo_id):
 
     serializer = TodoListSerializer(todo)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@csrf_exempt
+@api_view(['PUT'])
+def update_todo(request, todo_id):
+    user = request.user
+    if not user.is_authenticated:
+        return Response({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        todo = TodoItem.objects.get(id=todo_id, user=user)
+    except TodoItem.DoesNotExist:
+        return Response({"error": "Todo item not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = TodoListSerializer(todo, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+@api_view(['DELETE'])
+def delete_todo(request, todo_id):
+    user = request.user
+    if not user.is_authenticated:
+        return Response({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        todo = TodoItem.objects.get(id=todo_id, user=user)
+    except TodoItem.DoesNotExist:
+        return Response({"error": "Todo item not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    todo.delete()
+    return Response({"message": "Todo item deleted successfully"}, status=status.HTTP_204_NO_CONTENT)

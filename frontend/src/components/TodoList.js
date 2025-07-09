@@ -9,10 +9,11 @@ const TodoList = () => {
   // const dispatch = useDispatch();
   // const todos = useSelector((state) => state.todos);
   const [todoList, setTodoList] = useState([]);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     // Get token from localStorage or Redux state
-    const token = localStorage.getItem("token");
+
     axios
       .get("http://localhost:8000/list_todo/", {
         headers: {
@@ -48,6 +49,21 @@ const TodoList = () => {
       })
       .catch((error) => {
         console.error("Error updating todo:", error);
+      });
+  };
+  const deleteTodo = (id) => {
+    axios
+      .delete(`http://localhost:8000/delete_todo/${id}/`, {
+        headers: {
+          Authorization: token ? `Token ${token}` : undefined,
+        },
+      })
+      .then(() => {
+        // Remove the deleted todo from the state immediately
+        setTodoList((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+      })
+      .catch((error) => {
+        console.error("Error deleting todo:", error);
       });
   };
 
@@ -122,9 +138,7 @@ const TodoList = () => {
                     <input
                       type="checkbox"
                       checked={todo.completed}
-                      onChange={() =>
-                        completedTask(todo.id, !todo.completed)
-                      }
+                      onChange={() => completedTask(todo.id, !todo.completed)}
                       readOnly
                       style={{ width: 18, height: 18, accentColor: "#388e3c" }}
                     />
@@ -155,24 +169,23 @@ const TodoList = () => {
                     >
                       View
                     </NavLink>
-                    <button
+
+                    <NavLink
+                      to={`/edit_todo/${todo.id}`}
                       style={{
                         background: "#ffd600",
                         border: "none",
                         borderRadius: 4,
                         padding: "0.4rem 0.8rem",
-                        marginRight: 8,
-                        cursor: "pointer",
+                        color: "#fff",
                         fontWeight: "bold",
-                        color: "#333",
+                        cursor: "pointer",
                         boxShadow: "0 1px 3px rgba(0,0,0,0.07)",
                       }}
-                      onClick={() =>
-                        alert(`Edit functionality for todo id ${todo.id}`)
-                      }
                     >
                       Edit
-                    </button>
+                    </NavLink>
+
                     <button
                       style={{
                         background: "#ff5252",
@@ -184,9 +197,9 @@ const TodoList = () => {
                         cursor: "pointer",
                         boxShadow: "0 1px 3px rgba(0,0,0,0.07)",
                       }}
-                      onClick={() =>
-                        alert(`Delete functionality for todo id ${todo.id}`)
-                      }
+                      onClick={() => {
+                        deleteTodo(todo.id);
+                      }}
                     >
                       Delete
                     </button>

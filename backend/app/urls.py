@@ -10,4 +10,6 @@ urlpatterns = [
     path('list_todo/', list_todo, name='list_todo'),
     path('get_todo/<int:todo_id>/', get_todo, name='get_todo'),
     path('completed_todo/<int:todo_id>/', completed_task, name='update_todo'),
+    path('update_todo/<int:todo_id>/', update_todo, name='update_todo'),
+    path('delete_todo/<int:todo_id>/', delete_todo, name='delete_todo'),
 ]
