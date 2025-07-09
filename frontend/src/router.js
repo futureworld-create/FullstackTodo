@@ -1,19 +1,20 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import AddTodo from "./components/Create_Todo";
+import TodoList from "./components/TodoList";
+import { createBrowserRouter } from "react-router-dom";
 
-const AppRouter = () => (
-  <Router>
-    <Navbar />
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-    </Routes>
-  </Router>
-);
+const router = createBrowserRouter([
+  { path: "/", element: <Home /> },
+  { path: "/navbar", element: <Navbar /> },
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
+  { path: "/TodoNavbar", element: <Navbar /> },
+  { path: "/add_todo", element: <AddTodo /> },
+  { path: "/list_todo", element: <TodoList /> },
+]);
 
-export default AppRouter;
+export default router;

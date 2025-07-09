@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser
+from .models import CustomUser, TodoItem
 from django.contrib.auth import authenticate
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -25,3 +25,8 @@ class LoginSerializer(serializers.Serializer):
         if user and user.is_active:
             return user
         raise serializers.ValidationError('Invalid credentials')
+class TodoListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =TodoItem
+        fields = ['id', 'user', 'title', 'description', 'completed', 'created_at', 'due_date']
+    

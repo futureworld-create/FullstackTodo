@@ -1,7 +1,12 @@
 import React from "react";
+import Navbar from "./Navbar";
 
-const Home = () => (
-  <div
+const Home = () => {
+
+ return (
+    <>
+    <Navbar></Navbar>
+ <div
     style={{
       minHeight: "60vh",
       display: "flex",
@@ -17,6 +22,9 @@ const Home = () => (
       Organize your tasks efficiently and stay productive!
     </p>
   </div>
-);
+  </>
+)
+
+};
 
 export default Home;
