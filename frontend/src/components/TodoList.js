@@ -9,8 +9,11 @@ const TodoList = () => {
   // const dispatch = useDispatch();
   // const todos = useSelector((state) => state.todos);
   const [todoList, setTodoList] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const token = localStorage.getItem("token");
+  const [filteredTodos, setFilteredTodos] = useState([]); // Removed duplicate filteredTodos state
 
+  // Removed duplicate filteredTodos state
   useEffect(() => {
     // Get token from localStorage or Redux state
 
@@ -67,6 +70,48 @@ const TodoList = () => {
       });
   };
 
+  // Filter todos based on search term
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = todoList.filter((todo) =>
+        todo.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredTodos(filtered);
+    } else {
+      setFilteredTodos(todoList);
+    }
+  }, [searchTerm, todoList]);
+  // Filter todos based on status
+  const [filter, setFilter] = useState("");
+  useEffect(() => {
+    if (filter) {
+      const filtered = todoList.filter((todo) =>
+        filter === "completed" ? todo.completed : !todo.completed
+      );
+      setFilteredTodos(filtered);
+    } else {
+      setFilteredTodos(todoList);
+    }
+  }, [filter, todoList]);
+  // Export todos as JSON or text
+  const exportTodos = (format) => {
+    const data =
+      format === "json"
+        ? JSON.stringify(filteredTodos)
+        : filteredTodos
+            .map((todo) => `${todo.id}: ${todo.title} :${todo.due_date}`)
+            .join("\n");
+    const blob = new Blob([data], {
+      type: format === "json" ? "application/json" : "text/plain",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `todos.${format}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       <TodoNavbar />
@@ -83,12 +128,106 @@ const TodoList = () => {
           padding: 24,
         }}
       >
-        {todoList.length === 0 ? (
+        {/* Search Field */}
+        <div
+          style={{
+            marginBottom: 20,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <input
+            type="text"
+            placeholder="Search todos..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: "100%",
+              maxWidth: 350,
+              padding: "0.5rem 1rem",
+              borderRadius: 4,
+              border: "1px solid #ccc",
+              fontSize: 16,
+              outline: "none",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+            }}
+          />
+        </div>
+        {/* Filter button for pending and completed  */}
+        <div
+          style={{
+            marginBottom: 20,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: 4,
+              border: "1px solid #ccc",
+              fontSize: 16,
+              outline: "none",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+            }}
+          >
+            <option value="">All Todos</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div
+          style={{
+            marginBottom: 20,
+            display: "flex",
+            justifyContent: "center",
+            gap: 12,
+          }}
+        >
+          <button
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: 4,
+              border: "1px solid #ccc",
+              fontSize: 16,
+              outline: "none",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+              background: "#6c63ff",
+              color: "#fff",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+            onClick={() => exportTodos("json")}
+          >
+            Export as JSON
+          </button>
+          <button
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: 4,
+              border: "1px solid #ccc",
+              fontSize: 16,
+              outline: "none",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+              background: "#388e3c",
+              color: "#fff",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+            onClick={() => exportTodos("text")}
+          >
+            Export as Plain Text
+          </button>
+        </div>
+
+        {filteredTodos.length === 0 ? (
           <div style={{ textAlign: "center", color: "#888" }}>
             No todos found.
           </div>
         ) : null}
-        {todoList.length > 0 && (
+        {filteredTodos.length > 0 && (
           <div>
             <div
               style={{
@@ -103,6 +242,9 @@ const TodoList = () => {
               <div style={{ flex: 2, color: "#6c63ff" }}>TASK</div>
               <div style={{ flex: 3, color: "#888" }}>Description</div>
               <div style={{ flex: 2, color: "#888", textAlign: "center" }}>
+                Due Date
+              </div>
+              <div style={{ flex: 2, color: "#888", textAlign: "center" }}>
                 Status
               </div>
               <div style={{ flex: 4, color: "#888", textAlign: "center" }}>
@@ -110,7 +252,7 @@ const TodoList = () => {
               </div>
             </div>
             <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-              {todoList.map((todo) => (
+              {filteredTodos.map((todo) => (
                 <li
                   key={todo.id}
                   style={{
@@ -133,6 +275,11 @@ const TodoList = () => {
                   </div>
                   <div style={{ flex: 3, color: "#666" }}>
                     {todo.description}
+                  </div>
+                  <div style={{ flex: 2, textAlign: "center", color: "#666" }}>
+                    {todo.due_date
+                      ? new Date(todo.due_date).toLocaleDateString()
+                      : "No due date"}
                   </div>
                   <div style={{ flex: 2, textAlign: "center" }}>
                     <input
@@ -169,7 +316,6 @@ const TodoList = () => {
                     >
                       View
                     </NavLink>
-
                     <NavLink
                       to={`/edit_todo/${todo.id}`}
                       style={{
@@ -185,7 +331,6 @@ const TodoList = () => {
                     >
                       Edit
                     </NavLink>
-
                     <button
                       style={{
                         background: "#ff5252",
